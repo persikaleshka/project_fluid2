@@ -4,9 +4,13 @@
 
 Чтобы запустить вам нужно: |
 mkdir build
+
 cd build
+
 cmake -DTYPES=float,"FAST_FIXED(13,7)","FIXED(64,15)",double .. (можно с другими типами и числами, ниже написано об этом)
+
 cmake --build .
+
 ./project2 --p-type=float, --v-type="FIXED(64,15)", --v-flow-type="FAST_FIXED(13,7)"
 
 Типы: |
