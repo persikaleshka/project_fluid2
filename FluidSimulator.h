@@ -32,11 +32,10 @@ struct VectorField {
 };
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N = 36, size_t M = 84>
-class FluidSimulator {
+class Simulator {
 public:
-
-    FluidSimulator() = default;
-    void runSimulation(size_t T, size_t save_count, const std::string& file_name);
+    Simulator() = default;
+    void run_simulation(size_t T, size_t save_count, const std::string& file_name);
 
 private:
     VType rho_[256] {};
@@ -57,7 +56,7 @@ private:
         Ptype cur_p;
         std::array<VType, deltas.size()> v;
 
-        void swap_with(FluidSimulator& fs, int x, int y) {
+        void swap_with(Simulator& fs, int x, int y) {
             std::swap(fs.field[x][y], type);
             std::swap(fs.p[x][y], cur_p);
             std::swap(fs.velocity.v[x][y], v);
@@ -83,7 +82,7 @@ std::string trim(const std::string& str) {
 }
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N, size_t M>
-void FluidSimulator<Ptype, VType, VFlowType, N, M>::readInputFile(const std::string& filename)
+void Simulator<Ptype, VType, VFlowType, N, M>::readInputFile(const std::string& filename)
 {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -149,7 +148,7 @@ void FluidSimulator<Ptype, VType, VFlowType, N, M>::readInputFile(const std::str
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N, size_t M>
 std::tuple<VType, bool, std::pair<int, int>> 
-FluidSimulator<Ptype, VType, VFlowType, N, M>::propagate_flow(int x, int y, VType lim)  
+Simulator<Ptype, VType, VFlowType, N, M>::propagate_flow(int x, int y, VType lim)  
 {
     this->last_use[x][y] = this->UT - 1;
     VType ret = 0;
@@ -182,14 +181,14 @@ FluidSimulator<Ptype, VType, VFlowType, N, M>::propagate_flow(int x, int y, VTyp
 };
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N, size_t M>
-double FluidSimulator<Ptype, VType, VFlowType, N, M>::random01()
+double Simulator<Ptype, VType, VFlowType, N, M>::random01()
 {       
     std::uniform_real_distribution<double> dist(0.0, 1.0);
     return dist(random_generator_);
 }
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N, size_t M>
-void FluidSimulator<Ptype, VType, VFlowType, N, M>::propagate_stop(int x, int y, bool force)
+void Simulator<Ptype, VType, VFlowType, N, M>::propagate_stop(int x, int y, bool force)
 {
     if (!force) {
         bool stop = true;
@@ -215,7 +214,7 @@ void FluidSimulator<Ptype, VType, VFlowType, N, M>::propagate_stop(int x, int y,
 }
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N, size_t M>
-Ptype FluidSimulator<Ptype, VType, VFlowType, N, M>::move_prob(int x, int y)
+Ptype Simulator<Ptype, VType, VFlowType, N, M>::move_prob(int x, int y)
 {
     Ptype sum = 0;
     for (size_t i = 0; i < deltas.size(); ++i) {
@@ -234,7 +233,7 @@ Ptype FluidSimulator<Ptype, VType, VFlowType, N, M>::move_prob(int x, int y)
 }
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N, size_t M>
-bool FluidSimulator<Ptype, VType, VFlowType, N, M>::propagate_move(int x, int y, bool is_first)
+bool Simulator<Ptype, VType, VFlowType, N, M>::propagate_move(int x, int y, bool is_first)
 {
     last_use[x][y] = UT - is_first;
     bool ret = false;
@@ -292,7 +291,7 @@ bool FluidSimulator<Ptype, VType, VFlowType, N, M>::propagate_move(int x, int y,
 }
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N, size_t M>
-void FluidSimulator<Ptype, VType, VFlowType, N, M>::saveToJson(const std::string& filename) const {
+void Simulator<Ptype, VType, VFlowType, N, M>::saveToJson(const std::string& filename) const {
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Не удалось открыть файл для записи: " << filename << std::endl;
@@ -325,7 +324,7 @@ void FluidSimulator<Ptype, VType, VFlowType, N, M>::saveToJson(const std::string
 
 
 template<typename Ptype, typename VType, typename VFlowType, size_t N, size_t M>
-void FluidSimulator<Ptype, VType, VFlowType, N, M>::runSimulation(size_t T, size_t save_interval, const std::string& file_name)
+void Simulator<Ptype, VType, VFlowType, N, M>::run_simulation(size_t T, size_t save_interval, const std::string& file_name)
 {
     if (file_name.size() == 0) {
         readInputFile("../input.json");
