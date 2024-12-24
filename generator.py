@@ -45,10 +45,10 @@ int main(int argc, char* argv[]) {
     }
 
     size_t T = 2500;
-    size_t tick_for_save = 50;
+    size_t tick_save = 50;
     std::string input_file = "../input.json";
     std::visit([&](auto& simulator) { 
-        simulator.runSimulation(T, tick_for_save, input_file); 
+        simulator.run_simulation(T, tick_save, input_file); 
     }, arr[it->second]);
     return 0;
 }
@@ -82,8 +82,8 @@ def create_combinations(types, sizes):
 def generate_code(types, sizes):
     """Generate variant, vector, and params."""
     type_combinations = create_combinations(types, sizes)
-    types_variant = ", ".join(f"FluidSimulator<{t}>" for t in type_combinations)
-    types_vec = ", ".join(f"FluidSimulator<{t}>()" for t in type_combinations)
+    types_variant = ", ".join(f"Simulator<{t}>" for t in type_combinations)
+    types_vec = ", ".join(f"Simulator<{t}>()" for t in type_combinations)
     params_map = ", ".join(f'{{"{t}", {i}}}' for i, t in enumerate(type_combinations))
     return types_variant, types_vec, params_map
 
@@ -95,9 +95,9 @@ types_value = sys.argv[1]
 sizes_value = sys.argv[2]
 
 parsed_types = parse_types(types_value)
-sizes = parse_string(sizes_value)
+parsed_sizes = parse_string(sizes_value)
 
-variant, vec, params = generate_code(parsed_types, sizes)
+variant, vec, params = generate_code(parsed_types, parsed_sizes)
 rendered_code = cpp_template.replace("{{types}}", variant).replace("{{types_vec}}", vec).replace("{{params}}", params)
 
 with open("main.cpp", "w") as cpp_file:
